@@ -5,8 +5,8 @@ from weather.constants import MAX_CHAR_LENGTH
 
 
 class City(models.Model):
-    """Города как в базе."""
-    owm_city_id = models.IntegerField('Id города')
+    """Города."""
+    owm_city_id = models.CharField('Id города', max_length=MAX_CHAR_LENGTH)
     owm_city_name = models.CharField('Название города',
                                      max_length=MAX_CHAR_LENGTH)
     owm_latitude = models.FloatField('Широта')

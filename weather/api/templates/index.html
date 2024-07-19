@@ -41,10 +41,12 @@
   <div class="row">
     {% if data %}
       <div class="px-2 col-md-6 col-md-offset-3 result">
-        <h1>{{ data.city }}</h1>
-        <h3>Country Code: {{ data.country_code }}</h3>
+        <h1>{{ data.city_name}}</h1>
+        <h5>Country Code: {{ data.country_code }}</h5>
         <h5>Coordinate: {{ data.coordinate }}</h5>
+        <h5>Weather: {{ data.weather }}</h5>
         <h5>Temperature: {{ data.temp }}</h5>
+        <h5>Feels_like: {{ data.feels_like }}</h5>
         <h5>Pressure: {{ data.pressure }}</h5>
         <h5>Humidity: {{data.humidity }}</h5>
       </div>
