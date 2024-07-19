@@ -23,7 +23,7 @@ services:
       - db
 
   gateway:
-    image: anastasia289/weather_infra 
+    image: anastasia289/weather_gateway 
     volumes:
       - static:/static/
       - media:/media

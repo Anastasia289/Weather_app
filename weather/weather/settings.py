@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'sorl.thumbnail',
     'django.contrib.staticfiles',
     'corsheaders',
     'drf_yasg',
