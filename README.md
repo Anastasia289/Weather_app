@@ -1,16 +1,13 @@
 # Weather_app
 Приложение для получения информации о погоде. Пользователь вводит название города,  и получает для него прогноз погоды на ближайшее время.
 
+
+
 получить токен
 http://127.0.0.1:8000/v1/jwt/create/
 {
   "email": "admin@admin.ru",
   "password": "admin"
-}
-
-{
-    "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTcyMTQ4MTU0OCwiaWF0IjoxNzIxMzk1MTQ4LCJqdGkiOiIwZjZlOGE4MjZkZDA0YTNhYmFiYWMwODdhNDYwNzg0ZiIsInVzZXJfaWQiOjF9.L8crhepEGct-w0pZb84v13jJ0bZoTr_lxxtfU5T7omc",
-    "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIxNDgxNTQ4LCJpYXQiOjE3MjEzOTUxNDgsImp0aSI6IjRiM2UxYjgyM2Y4YzRlMjJhM2ZlYjE1MzJjNDhiM2ZhIiwidXNlcl9pZCI6MX0.ispdcbyjDLDizXV2DpvidLlyZa5Z6eAbqzrTFXUyylw"
 }
 
 После применения миграций база автоматически заполнится тестовыми данными
@@ -42,3 +39,13 @@ http://127.0.0.1:8000/v1/jwt/create/
 сделана загрузка городов
 # python manage.py load_cities
 # docker-compose exec backend python manage.py load_cities
+
+
+
+to do:
+1. Поправить получение города. Сейчас поиск погоды срабатывает только если ввести название города точно как в базе, причем не повторяющееся. 
+2. Сделать тесты.
+
+
++ сохранение истории
++ вывод истории

@@ -1,22 +1,16 @@
-from check_weather.models import City
+from check_weather.models import City, SearchHistory
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
-from rest_framework.fields import SerializerMethodField
+# from rest_framework.fields import SerializerMethodField
 from users.models import CustomUser
 
 
 class CustomUserSerializer(UserSerializer):
     """Сериализатор для управления пользователями."""
 
-    # earch_history = SerializerMethodField()
-
     class Meta:
         model = CustomUser
-        fields = ('id', 'username', 'email',) # 'search_history',)
-
-    # def get_search_history(self, obj):
-    #     search_history = Search_history.objects.filter(user_id=obj).all()
-    #     return SearchHistorySerializer(rented_bicycles, many=True).data
+        fields = ('id', 'username', 'email', 'password',)
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -32,7 +26,7 @@ class CityGetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = City
-        fields = ('owm_city_id', 'owm_city_name', )
+        fields = ('id', 'owm_city_id', 'owm_city_name', )
 
 
 class CityChangeSerializer(serializers.ModelSerializer):
@@ -41,3 +35,11 @@ class CityChangeSerializer(serializers.ModelSerializer):
     class Meta:
         model = City
         fields = '__all__'
+
+
+class SearchHistorySerializer(serializers.ModelSerializer):
+    """Сериализатор истории поиска."""
+
+    class Meta:
+        model = SearchHistory
+        fields = ('id', 'city', 'user', 'created_at')

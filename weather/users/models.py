@@ -7,8 +7,8 @@ from weather.constants import MAX_CHAR_LENGTH, MAX_EMAIL_LENGTH
 
 class CustomUser(AbstractUser):
     """переопределяем модель пользователя."""
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'password']
+    # USERNAME_FIELD = 'email'
+    # REQUIRED_FIELDS = ['username', 'password']
 
     email = models.EmailField(
         max_length=MAX_EMAIL_LENGTH,

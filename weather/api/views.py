@@ -1,110 +1,126 @@
-from django.shortcuts import render
-import requests
 import json
-import os 
-from dotenv import load_dotenv
-from check_weather.models import City
-from users.models import CustomUser
-from datetime import datetime
-from django.shortcuts import get_object_or_404
+import os
+
+import requests
+from check_weather.models import City, SearchHistory
+from django.shortcuts import get_object_or_404, render
+# from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from rest_framework import status, viewsets
-from rest_framework.decorators import action
+from rest_framework import viewsets, status
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.filters import OrderingFilter, SearchFilter
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from users.models import CustomUser
-from django_filters.rest_framework import DjangoFilterBackend
-from .serializers import (CustomUserSerializer, CityGetSerializer, CityChangeSerializer,
-                          )
-from .permissions import IsAdminOrReadOnly
-from .filters import CityFilter
-from django.views.generic import TemplateView, ListView
+from .serializers import (CityGetSerializer,
+                          CustomUserSerializer, SearchHistorySerializer)
 
 
 class CustomUserViewSet(UserViewSet):
-    """Позволяет просматривать список всех пользователей,
-    и свою страницу, а также регистрироваться. Вместе с информацией
-    о пользователе получаем его историю аренды велосипедов."""
+    """Вьюсет для пользователей."""
 
     queryset = CustomUser.objects.all()
-    permission_classes = [IsAuthenticated, ]
-    filter_backends = (SearchFilter, OrderingFilter)
-    search_fields = ('^email',)
-    ordering_fields = ('id', )
     serializer_class = CustomUserSerializer
     http_method_names = ['get', 'post',]
 
 
-class CityViewSet(UserViewSet):
+class CityViewSet(viewsets.ModelViewSet):
     """Вьюсет для городов"""
 
-    queryset = City.objects.select_related('owm_city_name')
-    # permission_classes = (IsAuthenticatedOrReadOnly,
-    #                       IsAdminOrReadOnly,)
-    permission_classes = (AllowAny,)
+    queryset = City.objects.all()
+    serializer_class = CityGetSerializer
     filter_backends = (SearchFilter, OrderingFilter)
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = CityFilter
-    search_fields = ('^owm_city_name', '^owm_city_id',)
-    ordering_fields = ('owm_city_name', 'owm_city_id',)
-    http_method_names = ['get', 'post',]
-
-    def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return CityGetSerializer
-        return CityChangeSerializer
+    search_fields = ('owm_city_name', )
+    http_method_names = ['get',]
 
 
+class SearchViewSet(viewsets.ModelViewSet):
+    """Вьюсет для городов"""
+
+    queryset = SearchHistory.objects.all()
+    serializer_class = SearchHistorySerializer
+    # filter_backends = (SearchFilter, OrderingFilter)
+    # search_fields = ('owm_city_name', )
+    http_method_names = ['get',]
 
 
 def index(request):
-    data = {}  # Initialize data as empty for both GET and POST requests
-    # API_KEY = os.getenv('API_KEY', default='73d4eb76b4a0c408fd16f3acc5cb28f4')
-    cities = City.objects.all()
+    data = {}
+    if request.user.is_authenticated:
+        data['search_history'] = get_search_history(request,)
     if request.method == "POST":
         cit = request.POST.get('city')
-        # city = City.objects.filter(owm_city_name=cit)
-        city = get_object_or_404(City, owm_city_name=cit)
-        data = get_weather(city.owm_city_id)
+        try:
+            city = get_object_or_404(City, owm_city_name=cit)
+        except Exception:
+            print("Город не найден")
+        try:
+            data = get_weather(city.owm_city_id, data)
+        except Exception:
+            print("Что-то погоду не получить")
+        try:
+            SearchHistory_create(city, request)
+            data['search_history'] = get_search_history(request,)
+        except Exception:
+            print("История не сохраняется")
+    return render(request, "index.html", {'data': data},)
 
-    return render(request, "index.html", {'data': data})
 
-
-
-
-
-def get_weather(city):
+def get_weather(city, data):
     """Получение погоды по городу"""
     API_KEY = os.getenv('API_KEY', default='73d4eb76b4a0c408fd16f3acc5cb28f4')
     try:
         response = requests.get(
             url=f'https://api.openweathermap.org/data/2.5/weather?id={city}&appid={API_KEY}&units=metric'
             )
-        response.raise_for_status()  # Raise an error for bad status codes
+        response.raise_for_status()
         list_of_data = response.json()
         weather_data = list_of_data['weather']
         weather, *w2 = weather_data
-        data = {
-            "city": city,  # Add the city name to the data dictionary
-            "city_name": str(list_of_data['name']),
-            "country_code": str(list_of_data['sys']['country']),
-            'coordinate': f"{list_of_data['coord']['lon']} {list_of_data['coord']['lat']}",
-            'weather': f"{weather['main']}, {weather['description']}",
-            'temp': f"{list_of_data['main']['temp']} (min: {list_of_data['main']['temp_min']} - (max: {list_of_data['main']['temp_max']})",
-            'feels_like': str(list_of_data['main']['feels_like']),
-            'pressure': str(list_of_data['main']['pressure']),
-            'humidity': str(list_of_data['main']['humidity']),
-            }
+        data["city"] = city,
+        data["city_name"] = str(list_of_data['name']),
+        data["country_code"] = str(list_of_data['sys']['country'])
+        data['coordinate'] = f"{list_of_data['coord']['lon']} {list_of_data['coord']['lat']}"
+        data['weather'] = f"{weather['main']}, {weather['description']}"
+        data['temp'] = (f'{list_of_data['main']['temp']}',
+                        f'(min: {list_of_data['main']['temp_min']} - ',
+                        f'(max: {list_of_data['main']['temp_max']})')
+        data['feels_like'] = str(list_of_data['main']['feels_like'])
+        data['pressure'] = str(list_of_data['main']['pressure'])
+        data['humidity'] = str(list_of_data['main']['humidity'])
+
     except requests.exceptions.HTTPError as http_err:
         print(f"HTTP error occurred: {http_err}")
     except requests.exceptions.RequestException as req_err:
         print(f"Error occurred: {req_err}")
     except json.JSONDecodeError as json_err:
         print(f"JSON decode error: {json_err}")
-    return(data)
+    return (data)
 
 
-class SearchResultsView(ListView):
-    model = City
-    template_name = 'city.html'
+@permission_classes([IsAuthenticated])
+def get_search_history(request):
+    """Выводим историю запросов для авторизованных пользователей."""
+    data = {}
+    searchhistory = SearchHistory.objects.filter(
+        user=request.user).all()
+    for history in searchhistory:
+        if history.city.owm_city_name not in data:
+            data[history.city.owm_city_name] = 1
+        else:
+            data[history.city.owm_city_name] += 1
+    return (data)
+
+
+@permission_classes([IsAuthenticated])
+def SearchHistory_create(city, request):
+    serializer = SearchHistorySerializer(
+        data={
+            'user': request.user.id,
+            'city': city.id,
+            },
+        context={'request': request})
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response('Город добавлен в историю поиска',
+                    status=status.HTTP_201_CREATED)

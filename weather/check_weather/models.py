@@ -1,7 +1,9 @@
-from django.db import models
+from django.contrib.auth import get_user_model
 from django.db import models
 
 from weather.constants import MAX_CHAR_LENGTH
+
+User = get_user_model()
 
 
 class City(models.Model):
@@ -38,3 +40,28 @@ class City(models.Model):
 
     def __str__(self):
         return self.owm_city_id
+
+
+class SearchHistory(models.Model):
+    """Список запросов."""
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='client',
+        verbose_name='пользователь',)
+    city = models.ForeignKey(
+        City,
+        on_delete=models.CASCADE,
+        related_name='searched_city',
+        verbose_name='город',)
+    created_at = models.DateTimeField(verbose_name='Время запроса',
+                                      auto_now_add=True)
+
+    class Meta:
+        verbose_name = ("Запрошенный город")
+        verbose_name_plural = ("Запрошенные города")
+        ordering = ['id']
+
+    def __str__(self):
+        return f'{self.user} искал {self.city}'
