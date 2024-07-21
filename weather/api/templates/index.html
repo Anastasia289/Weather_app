@@ -1,0 +1,28 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title>Weather</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="{% static 'main.css' %}">
+</head>
+
+<body>
+  {% include "includes/header.html" %}  
+</br> 
+</br> 
+  <section class="home" id="home">
+    {% if request.user.is_authenticated %}
+    {% include "includes/history.html" %}
+    {% endif %}
+  </section>
+  <section class="home" id="home">
+    {% include "includes/get_weather.html" %}
+  </section>
+</body>
+</html>
