@@ -1,6 +1,7 @@
-from check_weather.models import City, SearchHistory
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
+
+from check_weather.models import City, SearchHistory
 # from rest_framework.fields import SerializerMethodField
 from users.models import CustomUser
 

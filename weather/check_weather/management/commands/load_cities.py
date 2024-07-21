@@ -1,7 +1,8 @@
 import json
 
-from check_weather.models import City
 from django.core.management import BaseCommand
+
+from check_weather.models import City
 
 
 class Command(BaseCommand):

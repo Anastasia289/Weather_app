@@ -1,14 +1,14 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import CityViewSet, CustomUserViewSet, index, SearchViewSet
+from .views import CityViewSet, CustomUserViewSet, SearchViewSet, index
 
 app_name = "api"
 router_v1 = DefaultRouter()
 
 router_v1.register('users', CustomUserViewSet, basename='users')
 router_v1.register('city', CityViewSet, basename='city')
-router_v1.register('searchbb', SearchViewSet, basename='searchbb')
+router_v1.register('search', SearchViewSet, basename='search')
 
 
 urlpatterns = [

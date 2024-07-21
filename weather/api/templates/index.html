@@ -13,9 +13,9 @@
 </head>
 
 <body>
-  <nav class="row" style="background: blue; color: white;">
-    <h1 class="col-md-15 text-center">Django Weather App</h1>
-  </nav>
+  {% include "includes/header.html" %}  
+</br> 
+</br> 
   <section class="home" id="home">
     {% if request.user.is_authenticated %}
     {% include "includes/history.html" %}

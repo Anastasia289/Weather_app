@@ -2,18 +2,20 @@ import json
 import os
 
 import requests
-from check_weather.models import City, SearchHistory
 from django.shortcuts import get_object_or_404, render
 # from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from rest_framework import viewsets, status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework import status, viewsets
+from rest_framework.decorators import permission_classes  # api_view,
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from check_weather.models import City, SearchHistory
 from users.models import CustomUser
-from .serializers import (CityGetSerializer,
-                          CustomUserSerializer, SearchHistorySerializer)
+
+from .serializers import (CityGetSerializer, CustomUserSerializer,
+                          SearchHistorySerializer)
 
 
 class CustomUserViewSet(UserViewSet):
@@ -71,7 +73,8 @@ def get_weather(city, data):
     API_KEY = os.getenv('API_KEY', default='73d4eb76b4a0c408fd16f3acc5cb28f4')
     try:
         response = requests.get(
-            url=f'https://api.openweathermap.org/data/2.5/weather?id={city}&appid={API_KEY}&units=metric'
+            url=('https://api.openweathermap.org/data/2.5/'
+                 f'weather?id={city}&appid={API_KEY}&units=metric')
             )
         response.raise_for_status()
         list_of_data = response.json()
@@ -80,7 +83,8 @@ def get_weather(city, data):
         data["city"] = city,
         data["city_name"] = str(list_of_data['name']),
         data["country_code"] = str(list_of_data['sys']['country'])
-        data['coordinate'] = f"{list_of_data['coord']['lon']} {list_of_data['coord']['lat']}"
+        data['coordinate'] = (f'{list_of_data['coord']['lon']}'
+                              f'{list_of_data['coord']['lat']}')
         data['weather'] = f"{weather['main']}, {weather['description']}"
         data['temp'] = (f'{list_of_data['main']['temp']}',
                         f'(min: {list_of_data['main']['temp_min']} - ',
